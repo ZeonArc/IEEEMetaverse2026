@@ -102,10 +102,12 @@ public class NetworkModelGenerator
         Material matLEDGreen = CreateMat("Mat_LEDGreen", Color.green, 0.1f, 0.5f, 3f);
         Material matLEDRed = CreateMat("Mat_LEDRed", Color.red, 0.1f, 0.5f, 3f);
         Material matScreen = CreateMat("Mat_Screen", new Color(0f, 0.1f, 0.2f), 0.1f, 0.5f, 1f);
+        Material matFirewall = CreateMat("Mat_Firewall", new Color(0.4f, 0.05f, 0.05f), 0.7f, 0.3f); // Dark Red
 
         CreateAndSavePrefab("Server", BuildServer(matServer, matBlack, matLEDGreen), folderPath);
         CreateAndSavePrefab("Switch", BuildSwitch(matSwitch, matPortTeal, matLEDGreen), folderPath);
         CreateAndSavePrefab("Router", BuildRouter(matRouter, matPortYellow, matBlack), folderPath);
+        CreateAndSavePrefab("Firewall", BuildRouter(matFirewall, matLEDRed, matBlack), folderPath); // Reuse router shape but with red body and red ports
         CreateAndSavePrefab("Hub", BuildHub(matHub, matBlack, matLEDRed), folderPath);
         CreateAndSavePrefab("PC", BuildPC(matPC, matBlack, matPortTeal, matScreen), folderPath);
         CreateAndSavePrefab("Monitor", BuildMonitor(matPC, matScreen), folderPath);

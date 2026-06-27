@@ -69,11 +69,11 @@ public class PTGraph : MonoBehaviour
         }
     }
 
-    public void InjectPacket(PTNode source, string destIP)
+    public void InjectPacket(PTNode source, string destIP, bool isMalicious = false)
     {
         var go = Instantiate(PacketPrefab, source.transform.position, Quaternion.identity);
         var packet = go.GetComponent<PTPacket>();
-        packet.Init(source.IPAddress, destIP);
+        packet.Init(source.IPAddress, destIP, isMalicious);
 
         // Start transmission
         // In reality, it sends an ARP request, but we simulate it by pushing to its first connection

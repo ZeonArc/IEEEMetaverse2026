@@ -6,6 +6,7 @@ public class PTBuilderUI : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private PTEdgeDrawer edgeDrawer;
     [SerializeField] private PTPingTool pingTool;
+    [SerializeField] private PTConfigTablet configTablet;
     
     // UI Panels for tools
     [SerializeField] private GameObject edgeDrawerModeIndicator; 
@@ -31,6 +32,7 @@ public class PTBuilderUI : MonoBehaviour
             var newNode = graph.AddNodePrefab(prefabToSpawn, pos);
             if (edgeDrawer != null) edgeDrawer.RegisterNode(newNode);
             if (pingTool != null) pingTool.RegisterNode(newNode);
+            if (configTablet != null) configTablet.RegisterNode(newNode);
         }
     }
 

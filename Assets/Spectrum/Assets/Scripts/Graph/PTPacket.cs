@@ -9,12 +9,22 @@ public class PTPacket : MonoBehaviour
     
     public string Payload = "Ping Request";
     public float Speed = 2f;
+    public bool IsMalicious = false;
+    
+    private bool _isInitialized = false;
 
-    public void Init(string sourceIp, string destIp)
+    public void Init(string sourceIp, string destIp, bool isMalicious = false)
     {
         SourceIP = sourceIp;
         DestinationIP = destIp;
+        IsMalicious = isMalicious;
         
+        if (_isInitialized) return;
+        _isInitialized = true;
+        
+        Color packetColor = isMalicious ? Color.red : Color.green; // Red for hackers, Green for normal
+        if (Payload == "Ping Reply") packetColor = Color.cyan; // Keep reply cyan for visibility
+
         // Visual setup (a small glowing sphere)
         var mesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         mesh.transform.SetParent(transform);
@@ -22,9 +32,9 @@ public class PTPacket : MonoBehaviour
         mesh.transform.localScale = Vector3.one * 0.08f;
         
         var renderer = mesh.GetComponent<Renderer>();
-        renderer.material.color = Color.yellow;
+        renderer.material.color = packetColor;
         renderer.material.EnableKeyword("_EMISSION");
-        renderer.material.SetColor("_EmissionColor", Color.yellow * 2f);
+        renderer.material.SetColor("_EmissionColor", packetColor * 2f);
         
         Destroy(mesh.GetComponent<Collider>());
         
@@ -34,7 +44,7 @@ public class PTPacket : MonoBehaviour
         trail.startWidth = 0.04f;
         trail.endWidth = 0f;
         trail.material = new Material(Shader.Find("Sprites/Default"));
-        trail.material.color = Color.yellow;
+        trail.material.color = packetColor;
         
         // Add floating text label to the packet
         var textGo = new GameObject("Dest_Label");

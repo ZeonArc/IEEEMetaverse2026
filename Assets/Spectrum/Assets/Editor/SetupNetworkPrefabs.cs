@@ -126,6 +126,8 @@ public class SetupNetworkPrefabs
             if (contentsRoot.GetComponent<PTMonitor>() == null) contentsRoot.AddComponent<PTMonitor>();
         }
         else if (prefabPath.Contains("Switch")) node.Type = PTNode.DeviceType.Switch;
+        else if (prefabPath.Contains("Router")) node.Type = PTNode.DeviceType.Router;
+        else if (prefabPath.Contains("Firewall")) node.Type = PTNode.DeviceType.Firewall;
         else if (prefabPath.Contains("Hub")) node.Type = PTNode.DeviceType.Hub;
         else if (prefabPath.Contains("Monitor")) 
         {

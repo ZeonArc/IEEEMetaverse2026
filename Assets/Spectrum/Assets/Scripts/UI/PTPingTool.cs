@@ -7,11 +7,21 @@ public class PTPingTool : MonoBehaviour
     [SerializeField] private TextMeshProUGUI statusText;
 
     private bool _isPingMode = false;
+    private bool _isHackerMode = false;
     private PTNode _sourceNode = null;
 
     public void TogglePingMode()
     {
         _isPingMode = !_isPingMode;
+        _isHackerMode = false;
+        ResetSelection();
+        UpdateStatusText();
+    }
+
+    public void ToggleHackerMode()
+    {
+        _isPingMode = !_isPingMode;
+        _isHackerMode = _isPingMode; // If ping mode turned on, it's hacker mode. If off, it's off.
         ResetSelection();
         UpdateStatusText();
     }
@@ -46,8 +56,9 @@ public class PTPingTool : MonoBehaviour
             if (_sourceNode != node) // Don't ping yourself
             {
                 // Inject the packet into the network!
-                graph.InjectPacket(_sourceNode, node.IPAddress);
-                if (statusText) statusText.text = $"Ping Sent to {node.IPAddress}!";
+                graph.InjectPacket(_sourceNode, node.IPAddress, _isHackerMode);
+                string packetType = _isHackerMode ? "<color=red>Malicious Packet</color>" : "Ping";
+                if (statusText) statusText.text = $"{packetType} Sent to {node.IPAddress}!";
             }
             
             // Allow them to immediately send another ping by keeping Ping Mode on but resetting source
@@ -68,17 +79,19 @@ public class PTPingTool : MonoBehaviour
     {
         if (statusText == null) return;
 
+        string toolName = _isHackerMode ? "<color=red>Hacker Tool</color>" : "Ping Tool";
+
         if (!_isPingMode)
         {
-            statusText.text = "Ping Tool: OFF";
+            statusText.text = $"{toolName}: OFF";
         }
         else if (_sourceNode == null)
         {
-            statusText.text = "Ping Tool: Grab Source Device";
+            statusText.text = $"{toolName}: Grab Source Device";
         }
         else
         {
-            statusText.text = $"Ping Tool: Grab Destination Device\n<size=50%>(Source: {_sourceNode.IPAddress})</size>";
+            statusText.text = $"{toolName}: Grab Destination Device\n<size=50%>(Source: {_sourceNode.IPAddress})</size>";
         }
     }
 }

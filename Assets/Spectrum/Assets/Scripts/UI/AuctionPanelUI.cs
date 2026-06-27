@@ -12,6 +12,13 @@ public class AuctionPanelUI : MonoBehaviour
     private void ShowResult(NetworkNode node, AuctionResult result)
     {
         var panel = Instantiate(panelPrefab, node.transform.position + Vector3.up * 0.3f, Quaternion.identity);
+        
+        // Ensure the panel faces the player
+        if (panel.GetComponent<PTBillboard>() == null)
+        {
+            panel.AddComponent<PTBillboard>();
+        }
+
         var tmp = panel.GetComponentInChildren<TextMeshPro>();
         tmp.text = $"{result.Mode} AUCTION @ Node {node.Id}\n" +
                    $"Winner: Agent {result.Winner.GetInstanceID() % 1000}\n" +

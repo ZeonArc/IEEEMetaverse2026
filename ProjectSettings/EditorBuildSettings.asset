@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Spectrum/Assets/Scenes/MainMenu.unity
+    path: Assets/Spectrum/Assets/Scenes/MainMenuScene.unity
     guid: 66f00f32698a68c48b5773c0537cebde
   - enabled: 1
-    path: Assets/Spectrum/Assets/Scenes/CommandCenter.unity
+    path: Assets/Spectrum/Assets/Scenes/GraphSimulationScene.unity
     guid: 55daccc09a3b69647bbab145b54a3ab3
   - enabled: 1
     path: Assets/Spectrum/Assets/Scenes/PacketTracerMode.unity

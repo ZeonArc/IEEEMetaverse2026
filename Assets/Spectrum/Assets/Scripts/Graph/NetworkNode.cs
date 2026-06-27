@@ -18,6 +18,7 @@ public class NetworkNode : MonoBehaviour
     private List<Renderer> _ledRenderers = new List<Renderer>();
     private static readonly int ColorProp = Shader.PropertyToID("_EmissionColor");
     private static readonly int BaseColorProp = Shader.PropertyToID("_Color");
+    private TMPro.TextMeshPro _label;
 
     void Awake()
     {
@@ -52,6 +53,18 @@ public class NetworkNode : MonoBehaviour
             grab.trackRotation = false;
             grab.throwOnDetach = false;
         }
+
+        // Add Floating Label
+        var labelGo = new GameObject("NodeLabel");
+        labelGo.transform.SetParent(transform);
+        labelGo.transform.localPosition = new Vector3(0, 0.6f, 0);
+        
+        _label = labelGo.AddComponent<TMPro.TextMeshPro>();
+        _label.fontSize = 2f;
+        _label.alignment = TMPro.TextAlignmentOptions.Center;
+        
+        // Ensure it always faces the player
+        labelGo.AddComponent<PTBillboard>();
     }
 
     void Update()
@@ -75,6 +88,12 @@ public class NetworkNode : MonoBehaviour
             {
                 r.material.SetColor(BaseColorProp, c);
             }
+        }
+
+        if (_label != null)
+        {
+            _label.text = $"Node {Id}\nLoad: {CurrentLoad:F1}/{BandwidthCapacity:F1}";
+            _label.color = c;
         }
     }
 }

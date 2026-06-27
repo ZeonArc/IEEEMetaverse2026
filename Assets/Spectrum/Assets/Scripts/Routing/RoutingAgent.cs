@@ -20,6 +20,19 @@ public class RoutingAgent : MonoBehaviour
     void Start()
     {
         Valuation = Random.Range(1f, 10f);
+        
+        // Add TrailRenderer for visual polish
+        var tr = gameObject.AddComponent<TrailRenderer>();
+        tr.startWidth = 0.05f;
+        tr.endWidth = 0.01f;
+        tr.time = 2f;
+        
+        // Use a generic material if possible, or color it by Valuation
+        tr.material = new Material(Shader.Find("Sprites/Default"));
+        Color c = Color.Lerp(Color.red, Color.yellow, Valuation / 10f);
+        tr.startColor = c;
+        tr.endColor = new Color(c.r, c.g, c.b, 0f);
+
         RecalculatePath();
     }
 

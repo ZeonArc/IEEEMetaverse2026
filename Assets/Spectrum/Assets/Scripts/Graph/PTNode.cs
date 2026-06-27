@@ -6,7 +6,7 @@ using System.Linq;
 [RequireComponent(typeof(UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable), typeof(Rigidbody))]
 public class PTNode : MonoBehaviour
 {
-    public enum DeviceType { PC, Server, Switch, Router, Hub, Monitor }
+    public enum DeviceType { PC, Server, Switch, Router, Hub, Monitor, Firewall }
     public DeviceType Type = DeviceType.Router;
     public bool IsPoweredOn = true;
     
@@ -196,7 +196,14 @@ public class PTNode : MonoBehaviour
         {
             if (packet.DestinationIP == IPAddress)
             {
-                if (packet.Payload == "Ping Request")
+                if (packet.IsMalicious)
+                {
+                    Log($"HACKED! Malicious packet received from {packet.SourceIP}!");
+                    StartCoroutine(FlashColor(Color.red));
+                    // Simulate system crash
+                    IsPoweredOn = false;
+                }
+                else if (packet.Payload == "Ping Request")
                 {
                     Log($"Ping Request from {packet.SourceIP}! Sending Reply...");
                     StartCoroutine(FlashColor(Color.green));
@@ -221,6 +228,34 @@ public class PTNode : MonoBehaviour
                 Destroy(packet.gameObject);
                 return;
             }
+        }
+
+        // Layer 3: Firewall (Blocks malicious, routes others)
+        if (Type == DeviceType.Firewall)
+        {
+            if (packet.IsMalicious)
+            {
+                Log($"BLOCKED MALICIOUS PACKET from {packet.SourceIP}!");
+                StartCoroutine(FlashColor(Color.red));
+                Destroy(packet.gameObject);
+                return;
+            }
+            
+            // Allow and route
+            string targetSubnet = GetSubnet(packet.DestinationIP, SubnetMask);
+            if (RoutingTable.ContainsKey(targetSubnet))
+            {
+                Log($"Allowed safe packet to {targetSubnet}...");
+                StartCoroutine(FlashColor(Color.green));
+                RoutingTable[targetSubnet].Transmit(packet, this);
+            }
+            else
+            {
+                Log($"Dropped safe packet (No route to {packet.DestinationIP})");
+                StartCoroutine(FlashColor(Color.yellow));
+                Destroy(packet.gameObject);
+            }
+            return;
         }
 
         // Layer 3: Router

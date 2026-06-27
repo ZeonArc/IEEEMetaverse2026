@@ -202,9 +202,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1701377170}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
-        m_MethodName: LoadMechanismDesignPath
+      - m_Target: {fileID: 1701377173}
+        m_TargetAssemblyTypeName: VRMainMenu, Assembly-CSharp
+        m_MethodName: LaunchPacketTracerMode
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -634,7 +634,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mechanism Design Path
+  m_text: 'Packet Tracer
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -771,7 +773,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Networking Path
+  m_text: Graph Sim
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -999,9 +1001,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1701377170}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
-        m_MethodName: ShowStartScreen
+      - m_Target: {fileID: 1701377173}
+        m_TargetAssemblyTypeName: VRMainMenu, Assembly-CSharp
+        m_MethodName: ReturnToMainMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1753,7 +1755,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.049996376, y: -42.270008}
+  m_AnchoredPosition: {x: 115, y: 1}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1606158601
@@ -1800,9 +1802,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1701377170}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
-        m_MethodName: QuitExperience
+      - m_Target: {fileID: 1701377173}
+        m_TargetAssemblyTypeName: VRMainMenu, Assembly-CSharp
+        m_MethodName: QuitApplication
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1984,9 +1986,9 @@ GameObject:
   - component: {fileID: 1701377168}
   - component: {fileID: 1701377167}
   - component: {fileID: 1701377166}
-  - component: {fileID: 1701377170}
   - component: {fileID: 1701377172}
   - component: {fileID: 1701377171}
+  - component: {fileID: 1701377173}
   m_Layer: 5
   m_Name: MainMenu
   m_TagString: Untagged
@@ -2078,22 +2080,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 1.62}
   m_SizeDelta: {x: 500, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1701377170
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1701377165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f1e1e8c0c2f8c242bd46ea5ab645573, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MainMenuManager
-  startScreenPanel: {fileID: 1126812704}
-  selectionScreenPanel: {fileID: 1794306559}
-  networkingSceneName: NetworkingPath
-  mechanismDesignSceneName: CommandCenter
 --- !u!114 &1701377171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2438,6 +2424,23 @@ MonoBehaviour:
     m_InputActionReference: {fileID: 0}
     m_ObjectReferenceObject: {fileID: 0}
     m_ManualValue: 0
+--- !u!114 &1701377173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701377165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88b45ecb0c2f95547a45006af200d846, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRMainMenu
+  mainMenuPanel: {fileID: 1126812704}
+  selectionScreenPanel: {fileID: 1794306559}
+  packetTracerSceneName: PacketTracerMode
+  graphSimulationSceneName: GraphSimulationScene
+  mainMenuSceneName: MainMenuScene
 --- !u!1 &1711490766
 GameObject:
   m_ObjectHideFlags: 0
@@ -2521,9 +2524,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1701377170}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
-        m_MethodName: LoadNetworkingPath
+      - m_Target: {fileID: 1701377173}
+        m_TargetAssemblyTypeName: VRMainMenu, Assembly-CSharp
+        m_MethodName: LaunchGraphSimulationMode
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2840,7 +2843,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.049996376, y: -0.16999549}
+  m_AnchoredPosition: {x: -106, y: -0.16999549}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2003345394
@@ -2887,8 +2890,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1701377170}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
+      - m_Target: {fileID: 1701377173}
+        m_TargetAssemblyTypeName: VRMainMenu, Assembly-CSharp
         m_MethodName: ShowSelectionScreen
         m_Mode: 1
         m_Arguments:
