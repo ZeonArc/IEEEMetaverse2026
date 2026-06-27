@@ -901,7 +901,7 @@ PlayerSettings:
     PS4: UNITY_POST_PROCESSING_STACK_V2
     PS5: UNITY_POST_PROCESSING_STACK_V2
     Stadia: UNITY_POST_PROCESSING_STACK_V2
-    Standalone: USE_INPUT_SYSTEM_POSE_CONTROL;UNITY_POST_PROCESSING_STACK_V2;USE_STICK_CONTROL_THUMBSTICKS
+    Standalone: USE_INPUT_SYSTEM_POSE_CONTROL;UNITY_POST_PROCESSING_STACK_V2;USE_STICK_CONTROL_THUMBSTICKS;SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
     WebGL: UNITY_POST_PROCESSING_STACK_V2
     Windows Store Apps: USE_INPUT_SYSTEM_POSE_CONTROL;UNITY_POST_PROCESSING_STACK_V2;USE_STICK_CONTROL_THUMBSTICKS
     XboxOne: UNITY_POST_PROCESSING_STACK_V2
@@ -928,7 +928,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: IEEEMetaverse2026
-  metroPackageVersion: 
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -936,7 +936,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: IEEEMetaverse2026
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: IEEEMetaverse2026
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
