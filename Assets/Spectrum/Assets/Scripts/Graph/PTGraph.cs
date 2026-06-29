@@ -37,11 +37,11 @@ public class PTGraph : MonoBehaviour
         return node;
     }
 
-    public PTEdge AddEdge(PTNode a, PTNode b, List<Vector3> points = null)
+    public PTEdge AddEdge(PTNode a, PTNode b, List<Vector3> points = null, PTEdge.CableType cableType = PTEdge.CableType.Cat5)
     {
         var go = Instantiate(EdgePrefab, transform);
         var edge = go.GetComponent<PTEdge>();
-        edge.Init(a, b, points);
+        edge.Init(a, b, points, cableType);
         Edges.Add(edge);
         
         // Auto-configure routing table if we attach a PC to a Router
@@ -69,11 +69,13 @@ public class PTGraph : MonoBehaviour
         }
     }
 
-    public void InjectPacket(PTNode source, string destIP, bool isMalicious = false)
+    public void InjectPacket(PTNode source, string destIP, bool isMalicious = false, PTPacket.Protocol protocol = PTPacket.Protocol.ICMP)
     {
         var go = Instantiate(PacketPrefab, source.transform.position, Quaternion.identity);
         var packet = go.GetComponent<PTPacket>();
-        packet.Init(source.IPAddress, destIP, isMalicious);
+        packet.Init(source.IPAddress, destIP, isMalicious, protocol);
+        
+        if (protocol == PTPacket.Protocol.HTTP) packet.Payload = "GET / HTTP/1.1";
 
         // Start transmission
         // In reality, it sends an ARP request, but we simulate it by pushing to its first connection

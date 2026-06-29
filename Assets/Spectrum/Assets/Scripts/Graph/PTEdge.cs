@@ -9,15 +9,20 @@ public class PTEdge : MonoBehaviour
     public PTNode NodeB;
     public List<Vector3> PathPoints = new List<Vector3>();
 
+    public enum CableType { Cat5, Fiber }
+    public CableType Type = CableType.Cat5;
+
     public float Bandwidth = 100f; // Mbps
+    public float SpeedMultiplier = 1f;
 
     private LineRenderer _lr;
     private TextMeshPro _label;
 
-    public void Init(PTNode a, PTNode b, List<Vector3> points = null)
+    public void Init(PTNode a, PTNode b, List<Vector3> points = null, CableType cableType = CableType.Cat5)
     {
         NodeA = a;
         NodeB = b;
+        Type = cableType;
         
         NodeA.Connections.Add(this);
         NodeB.Connections.Add(this);
@@ -28,14 +33,28 @@ public class PTEdge : MonoBehaviour
         }
 
         _lr = GetComponent<LineRenderer>();
-        _lr.startWidth = 0.01f;
-        _lr.endWidth = 0.01f;
         
-        // Ensure it's visible by assigning a default material
-        if (_lr.material == null || _lr.material.name == "Default-Material")
+        if (Type == CableType.Fiber)
         {
+            _lr.startWidth = 0.008f;
+            _lr.endWidth = 0.008f;
+            Bandwidth = 10000f; // 10 Gbps
+            SpeedMultiplier = 3f; // 3x visual speed
+            
             _lr.material = new Material(Shader.Find("Sprites/Default"));
-            _lr.material.color = Color.white;
+            _lr.material.color = new Color(1f, 0.5f, 0f); // Bright Orange
+            _lr.material.EnableKeyword("_EMISSION");
+            _lr.material.SetColor("_EmissionColor", new Color(1f, 0.5f, 0f) * 2f);
+        }
+        else // Cat5
+        {
+            _lr.startWidth = 0.015f;
+            _lr.endWidth = 0.015f;
+            Bandwidth = 100f; // 100 Mbps
+            SpeedMultiplier = 1f;
+            
+            _lr.material = new Material(Shader.Find("Standard"));
+            _lr.material.color = new Color(0.3f, 0.3f, 0.3f); // Dark Gray
         }
 
         var labelGo = new GameObject("EdgeLabel");

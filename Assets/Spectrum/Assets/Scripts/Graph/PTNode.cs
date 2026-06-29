@@ -9,6 +9,7 @@ public class PTNode : MonoBehaviour
     public enum DeviceType { PC, Server, Switch, Router, Hub, Monitor, Firewall }
     public DeviceType Type = DeviceType.Router;
     public bool IsPoweredOn = true;
+    public string HostedWebsite = "<h1>Welcome!</h1>\n<p>This is a default server page.</p>";
     
     public System.Action<string> OnLogEvent;
 
@@ -132,7 +133,11 @@ public class PTNode : MonoBehaviour
 
     public void ReceivePacket(PTPacket packet, PTEdge incomingEdge)
     {
-        if (!IsPoweredOn) return;
+        if (!IsPoweredOn) 
+        {
+            Destroy(packet.gameObject);
+            return;
+        }
 
         // Layer 1: Hub forwards everywhere except where it came from
         if (Type == DeviceType.Hub)
@@ -143,7 +148,7 @@ public class PTNode : MonoBehaviour
                 if (edge != incomingEdge) 
                 {
                     var clone = Instantiate(packet.gameObject).GetComponent<PTPacket>();
-                    clone.Init(packet.SourceIP, packet.DestinationIP);
+                    clone.Init(packet.SourceIP, packet.DestinationIP, packet.IsMalicious, packet.PacketProtocol);
                     clone.Payload = packet.Payload;
                     edge.Transmit(clone, this);
                 }
@@ -166,28 +171,39 @@ public class PTNode : MonoBehaviour
             if (MacTable.ContainsKey(packet.DestinationIP))
             {
                 var targetEdge = MacTable[packet.DestinationIP];
-                if (targetEdge != incomingEdge)
+                if (targetEdge == null)
+                {
+                    Log($"Learned route is dead. Removing from MacTable and falling back to Broadcast.");
+                    MacTable.Remove(packet.DestinationIP);
+                    // Fallthrough to broadcast below
+                }
+                else if (targetEdge != incomingEdge)
                 {
                     Log($"Forwarding packet to {packet.DestinationIP} via specific port.");
                     targetEdge.Transmit(packet, this);
+                    return;
                 }
-            }
-            else
-            {
-                // Broadcast if destination is unknown
-                Log($"Destination unknown. Broadcasting packet.");
-                foreach (var edge in Connections)
+                else
                 {
-                    if (edge != incomingEdge) 
-                    {
-                        var clone = Instantiate(packet.gameObject).GetComponent<PTPacket>();
-                        clone.Init(packet.SourceIP, packet.DestinationIP);
-                        clone.Payload = packet.Payload;
-                        edge.Transmit(clone, this);
-                    }
+                    Log($"Dropped packet (Destination is on the incoming edge)");
+                    Destroy(packet.gameObject);
+                    return;
                 }
-                Destroy(packet.gameObject); // Destroy original
             }
+
+            // Broadcast if destination is unknown or route was dead
+            Log($"Destination unknown. Broadcasting packet.");
+            foreach (var edge in Connections)
+            {
+                if (edge != incomingEdge) 
+                {
+                    var clone = Instantiate(packet.gameObject).GetComponent<PTPacket>();
+                    clone.Init(packet.SourceIP, packet.DestinationIP, packet.IsMalicious, packet.PacketProtocol);
+                    clone.Payload = packet.Payload;
+                    edge.Transmit(clone, this);
+                }
+            }
+            Destroy(packet.gameObject); // Destroy original
             return;
         }
 
@@ -203,6 +219,31 @@ public class PTNode : MonoBehaviour
                     // Simulate system crash
                     IsPoweredOn = false;
                 }
+                else if (packet.PacketProtocol == PTPacket.Protocol.HTTP && packet.Payload.StartsWith("GET"))
+                {
+                    Log($"HTTP GET from {packet.SourceIP}! Sending Webpage...");
+                    StartCoroutine(FlashColor(Color.blue));
+                    
+                    var ptGraph = FindObjectOfType<PTGraph>();
+                    if (ptGraph != null && incomingEdge != null)
+                    {
+                        var go = Instantiate(ptGraph.PacketPrefab, transform.position, Quaternion.identity);
+                        var replyPacket = go.GetComponent<PTPacket>();
+                        replyPacket.Init(IPAddress, packet.SourceIP, false, PTPacket.Protocol.HTTP);
+                        
+                        // If it's a server, return the website. If PC, return 404
+                        replyPacket.Payload = Type == DeviceType.Server ? HostedWebsite : "<h1>404 Not Found</h1>";
+                        incomingEdge.Transmit(replyPacket, this);
+                    }
+                }
+                else if (packet.PacketProtocol == PTPacket.Protocol.HTTP && !packet.Payload.StartsWith("GET"))
+                {
+                    Log($"HTTP Reply received from {packet.SourceIP}!");
+                    StartCoroutine(FlashColor(Color.cyan)); 
+                    
+                    var monitor = GetComponentInChildren<PTMonitor>();
+                    if (monitor != null) monitor.DisplayWebpage(packet.Payload);
+                }
                 else if (packet.Payload == "Ping Request")
                 {
                     Log($"Ping Request from {packet.SourceIP}! Sending Reply...");
@@ -210,13 +251,13 @@ public class PTNode : MonoBehaviour
                     
                     // Generate Reply
                     var ptGraph = FindObjectOfType<PTGraph>();
-                    if (ptGraph != null && Connections.Count > 0)
+                    if (ptGraph != null && incomingEdge != null)
                     {
                         var go = Instantiate(ptGraph.PacketPrefab, transform.position, Quaternion.identity);
                         var replyPacket = go.GetComponent<PTPacket>();
                         replyPacket.Init(IPAddress, packet.SourceIP);
                         replyPacket.Payload = "Ping Reply";
-                        Connections[0].Transmit(replyPacket, this);
+                        incomingEdge.Transmit(replyPacket, this);
                     }
                 }
                 else if (packet.Payload == "Ping Reply")

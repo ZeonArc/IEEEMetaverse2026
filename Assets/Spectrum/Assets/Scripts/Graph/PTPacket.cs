@@ -13,17 +13,27 @@ public class PTPacket : MonoBehaviour
     
     private bool _isInitialized = false;
 
-    public void Init(string sourceIp, string destIp, bool isMalicious = false)
+    public enum Protocol { ICMP, HTTP }
+    public Protocol PacketProtocol = Protocol.ICMP;
+
+    public void Init(string sourceIp, string destIp, bool isMalicious = false, Protocol protocol = Protocol.ICMP)
     {
         SourceIP = sourceIp;
         DestinationIP = destIp;
         IsMalicious = isMalicious;
+        PacketProtocol = protocol;
         
         if (_isInitialized) return;
         _isInitialized = true;
         
-        Color packetColor = isMalicious ? Color.red : Color.green; // Red for hackers, Green for normal
-        if (Payload == "Ping Reply") packetColor = Color.cyan; // Keep reply cyan for visibility
+        Color packetColor = Color.green; // Normal ICMP
+        
+        if (isMalicious) 
+            packetColor = Color.red; 
+        else if (protocol == Protocol.HTTP) 
+            packetColor = Color.blue; // HTTP is Blue
+        else if (Payload == "Ping Reply") 
+            packetColor = Color.cyan; // Keep reply cyan for visibility
 
         // Visual setup (a small glowing sphere)
         var mesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -67,7 +77,26 @@ public class PTPacket : MonoBehaviour
 
     private IEnumerator TravelRoutine(PTEdge edge, PTNode fromNode, PTNode toNode)
     {
+        float activeSpeed = Speed * edge.SpeedMultiplier;
         bool hasPathPoints = edge.PathPoints != null && edge.PathPoints.Count >= 2;
+        
+        // Physics Simulation: Packet Loss on long Cat5 cables
+        bool dropsMidway = false;
+        if (edge.Type == PTEdge.CableType.Cat5)
+        {
+            float dist = Vector3.Distance(fromNode.transform.position, toNode.transform.position);
+            if (dist > 2.0f)
+            {
+                float dropChance = (dist - 2.0f) * 0.2f; // 20% per meter over 2m
+                if (Random.value < dropChance)
+                {
+                    dropsMidway = true;
+                }
+            }
+        }
+        
+        float totalDist = Vector3.Distance(fromNode.transform.position, toNode.transform.position);
+        float distTraveled = 0f;
 
         if (!hasPathPoints)
         {
@@ -75,7 +104,17 @@ public class PTPacket : MonoBehaviour
             transform.position = fromNode.transform.position;
             while (Vector3.Distance(transform.position, toNode.transform.position) > 0.02f)
             {
-                transform.position = Vector3.MoveTowards(transform.position, toNode.transform.position, Speed * Time.deltaTime);
+                float step = activeSpeed * Time.deltaTime;
+                transform.position = Vector3.MoveTowards(transform.position, toNode.transform.position, step);
+                distTraveled += step;
+                
+                if (dropsMidway && distTraveled > totalDist * 0.5f)
+                {
+                    Debug.Log($"[Packet Loss] Packet dropped due to Cat5 attenuation!");
+                    Destroy(gameObject);
+                    yield break;
+                }
+                
                 yield return null;
             }
         }
@@ -88,16 +127,26 @@ public class PTPacket : MonoBehaviour
 
             int startIdx = reverse ? points.Count - 1 : 0;
             int endIdx = reverse ? -1 : points.Count;
-            int step = reverse ? -1 : 1;
+            int stepDir = reverse ? -1 : 1;
 
             transform.position = points[startIdx];
 
-            for (int i = startIdx; i != endIdx; i += step)
+            for (int i = startIdx; i != endIdx; i += stepDir)
             {
                 Vector3 targetPoint = points[i];
                 while (Vector3.Distance(transform.position, targetPoint) > 0.01f)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, targetPoint, Speed * Time.deltaTime);
+                    float step = activeSpeed * Time.deltaTime;
+                    transform.position = Vector3.MoveTowards(transform.position, targetPoint, step);
+                    distTraveled += step;
+                    
+                    if (dropsMidway && distTraveled > totalDist * 0.5f)
+                    {
+                        Debug.Log($"[Packet Loss] Packet dropped due to Cat5 attenuation!");
+                        Destroy(gameObject);
+                        yield break;
+                    }
+                    
                     yield return null;
                 }
             }

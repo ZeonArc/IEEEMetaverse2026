@@ -9,7 +9,9 @@ public class PTEdgeDrawer : MonoBehaviour
     [SerializeField] private PTGraph graph;
     [SerializeField] private TextMeshProUGUI statusText;
 
-    private bool _isDrawingMode = false;
+    public enum DrawerState { OFF, Cat5, Fiber }
+    private DrawerState _currentState = DrawerState.OFF;
+
     private PTNode _firstNode = null;
     private Transform _interactorTransform = null;
     
@@ -33,10 +35,13 @@ public class PTEdgeDrawer : MonoBehaviour
 
     public void ToggleDrawingMode()
     {
-        _isDrawingMode = !_isDrawingMode;
+        if (_currentState == DrawerState.OFF) _currentState = DrawerState.Cat5;
+        else if (_currentState == DrawerState.Cat5) _currentState = DrawerState.Fiber;
+        else _currentState = DrawerState.OFF;
+
         ResetSelection();
         UpdateStatusText();
-        Debug.Log($"[PTEdgeDrawer] ToggleDrawingMode called. IsDrawingMode: {_isDrawingMode}");
+        Debug.Log($"[PTEdgeDrawer] ToggleDrawingMode called. State: {_currentState}");
     }
 
     public void RegisterNode(PTNode node)
@@ -55,8 +60,8 @@ public class PTEdgeDrawer : MonoBehaviour
 
     private void OnNodeSelected(PTNode node, Transform interactor)
     {
-        Debug.Log($"[PTEdgeDrawer] Node selected: {node.gameObject.name}. IsDrawingMode: {_isDrawingMode}");
-        if (!_isDrawingMode) return;
+        Debug.Log($"[PTEdgeDrawer] Node selected: {node.gameObject.name}. State: {_currentState}");
+        if (_currentState == DrawerState.OFF) return;
 
         if (_firstNode == null)
         {
@@ -70,8 +75,8 @@ public class PTEdgeDrawer : MonoBehaviour
             if (_firstNode != node) // Don't connect a node to itself
             {
                 Debug.Log($"[PTEdgeDrawer] Connecting {_firstNode.gameObject.name} to {node.gameObject.name}");
-                // Pass null for points so PTEdge creates a clean, straight dynamic line!
-                graph.AddEdge(_firstNode, node, null);
+                var cableType = _currentState == DrawerState.Fiber ? PTEdge.CableType.Fiber : PTEdge.CableType.Cat5;
+                graph.AddEdge(_firstNode, node, null, cableType);
             }
             else
             {
@@ -84,12 +89,15 @@ public class PTEdgeDrawer : MonoBehaviour
 
     void Update()
     {
-        if (_isDrawingMode && _firstNode != null && _interactorTransform != null)
+        if (_currentState != DrawerState.OFF && _firstNode != null && _interactorTransform != null)
         {
             // Draw a straight preview line from the first node to the player's hand
             _previewLine.positionCount = 2;
             _previewLine.SetPosition(0, _firstNode.transform.position);
             _previewLine.SetPosition(1, _interactorTransform.position);
+            
+            if (_currentState == DrawerState.Fiber) _previewLine.material.color = new Color(1f, 0.5f, 0f);
+            else _previewLine.material.color = Color.yellow;
         }
     }
 
@@ -106,17 +114,17 @@ public class PTEdgeDrawer : MonoBehaviour
     {
         if (statusText == null) return;
 
-        if (!_isDrawingMode)
+        if (_currentState == DrawerState.OFF)
         {
             statusText.text = "Cable Drawer: OFF";
         }
         else if (_firstNode == null)
         {
-            statusText.text = "Cable Drawer: Grab Device A";
+            statusText.text = $"Drawer ({_currentState}): Grab Device A";
         }
         else
         {
-            statusText.text = "Cable Drawer: Draw & Grab Device B";
+            statusText.text = $"Drawer ({_currentState}): Draw & Grab Device B";
         }
     }
 }
